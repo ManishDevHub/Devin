@@ -6,3 +6,19 @@ backend/node_modules/
 dist/
 build/
 coverage/
+
+# Dependencies
+node_modules/
+**/node_modules/
+node_modules copy/
+**/node_modules copy/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+coverage/
