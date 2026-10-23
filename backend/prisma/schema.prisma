@@ -11,10 +11,76 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum TaskStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum StepType{
+  THOUGHT
+  COMMAND
+  FILE_EDIT
+  BROWSER
+  MESSAGE
+  ERROR
+}
 model User {
   id          String   @id @default(uuid())
   username    String    @unique
   email       String    @unique
   password    String
-  
+  tasks       Task[]
+  projects    Project[]
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  repoUrl     String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  prompt      String
+  status      TaskStatus @default(QUEUED)
+  result      String?
+  error       String?
+  projectId   String
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  steps       TaskStep[]
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([projectId])
+  @@index([userId, status])
+}
+
+model TaskStep {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  index     Int
+  type      StepType
+  content   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@unique([taskId, index])
+  @@index([taskId])
 }
