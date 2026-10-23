@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import prisma from '../db/prisma';
 
 export const signup = async (req: Request, res: Response) => {
     try {
@@ -48,7 +49,7 @@ export const signup = async (req: Request, res: Response) => {
         });
 
         const token = jwt.sign(
-            { userId: newUser.id, email: newUser.email, username: newUser.username, role: newUser.role },
+            { userId: newUser.id, email: newUser.email, username: newUser.username },
             process.env.JWT_SECRET || 'supersecret_careerhub_jwt_key_2026',
             { expiresIn: '7d' }
         );
@@ -61,7 +62,7 @@ export const signup = async (req: Request, res: Response) => {
                 id: newUser.id,
                 username: newUser.username,
                 email: newUser.email,
-                role: newUser.role
+               
             }
         });
 
@@ -100,7 +101,7 @@ export const login = async (req: Request, res: Response) => {
         }
 
         const token = jwt.sign(
-            { userId: user.id, email: user.email, username: user.username, role: user.role || 'user' },
+            { userId: user.id, email: user.email, username: user.username },
             process.env.JWT_SECRET || 'supersecret_careerhub_jwt_key_2026',
             { expiresIn: '7d' }
         );
@@ -113,7 +114,7 @@ export const login = async (req: Request, res: Response) => {
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                role: user.role || 'user'
+              
             }
         });
 
