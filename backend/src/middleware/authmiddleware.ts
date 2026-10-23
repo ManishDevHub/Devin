@@ -9,7 +9,7 @@ export interface AuthUser {
     role?: string;
 }
 
-export interface AuthRequest extends Request {
+export default interface AuthRequest extends Request {
     user?: AuthUser;
 }
 
