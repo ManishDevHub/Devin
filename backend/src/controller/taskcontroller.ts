@@ -73,11 +73,12 @@ export const getTaskById  = async ( req: AuthRequest , res: Response ) => {
 
         const { id } = req.params as { id: string };
         const userId = req.user?.id as string;
-        const task = await prisma.task.findUnique({
+        const task = await prisma.task.findFirst({
             where:{
                 id: id,
                 userId: userId
-            }
+            },
+            orderBy: { createdAt: 'desc' },
         })
 
         if(!task) {
@@ -110,9 +111,7 @@ export const getTaskById  = async ( req: AuthRequest , res: Response ) => {
                 id: id,     
             userId: userId
             },
-            data:{
-                prompt
-            }
+            data: { status: 'CANCELLED', finishedAt: new Date() },
         })  
     if(!task) { 
         return res.status(404).json({ message: "Task not found" })
