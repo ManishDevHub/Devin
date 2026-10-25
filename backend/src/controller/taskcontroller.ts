@@ -97,7 +97,7 @@ export const getTaskById  = async ( req: AuthRequest , res: Response ) => {
     }
 }
 
-const UpdateTask = async (req:AuthRequest , res: Response) => {
+ export const UpdateTask = async (req:AuthRequest , res: Response) => {
 
     try{ 
 
