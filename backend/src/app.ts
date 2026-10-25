@@ -2,6 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import authRouter from './routes/authrouter';
 import prisma from './db/prisma';
+import projectRouter from './routes/projectroutes';
+import taskRouter from './routes/taskroutes';
 const PORT = process.env.PORT || 5000;
 
 dotenv.config();
@@ -9,7 +11,9 @@ const app = express();
 app.use(express.json());
 
 
-app.use('/api/auth', authRouter);
+app.use('/api/auth',  authRouter);
+app.use('/api/projects', projectRouter);
+app.use("/api/tasks" ,  taskRouter)
 
 
 async function startServer() {
