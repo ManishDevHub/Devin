@@ -31,3 +31,40 @@ export const createTask =  async( req: AuthRequest , res:Response) => {
         return res.status(500).json({ message: "Internal server error"});
     }
 }
+
+export const getAllTasks = async ( req:AuthRequest , res: Response) => {
+
+    try{
+
+        const task = await prisma.task.findMany({
+            where:{
+                userId: req.user?.id as string
+            },
+        })
+        if(!task) {
+            return res.status(404).json({ message: "No tasks found"})
+        }
+
+        return res.status(200).json({
+            message: " Tasks fetched successfully",
+            task
+        })
+
+
+
+    } catch(error) {
+        console.error("getAllTasks error: " , error);
+        return res.status(500).json({ message: "Internal server error"});
+    }
+}
+
+
+export const getTaskById  = async ( req: AuthRequest , res: Response ) => {
+
+    try{
+
+
+    }catch(error) {
+        
+    }
+}
