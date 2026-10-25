@@ -10,12 +10,19 @@ export const createTask =  async( req: AuthRequest , res:Response) => {
     try{
 
         const { projectId , prompt } = req.body;
+           if (!projectId || !prompt) {
+            return res.status(400).json({
+                success: false,
+                message: 'projectId and prompt are required',
+            });
+        }
 
         const newTask = await prisma.task.create({
             data:{
                 projectId,
                 prompt,
-                userId: req.user?.id as string
+                userId: req.user?.id as string,
+                status: 'QUEUED',
             }
             
         })
@@ -40,6 +47,7 @@ export const getAllTasks = async ( req:AuthRequest , res: Response) => {
             where:{
                 userId: req.user?.id as string
             },
+            orderBy: { createdAt: 'desc' },
         })
         if(!task) {
             return res.status(404).json({ message: "No tasks found"})
@@ -142,4 +150,34 @@ export const deleteTask = async ( req: AuthRequest , res: Response ) => {
         console.error("deleteTask error" , error);
         return res.status(500).json({ message: "Internal server error"})
     } 
-}  
+}
+
+
+export const cancelTask = async (req: AuthRequest, res: Response) => {
+    try {
+
+        const { id } = req.params as { id: string };
+        const userId = req.user?.id as string;
+        const task = await prisma.task.findFirst({
+            where: { id: id, userId: userId },
+        });
+
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        if (task.status !== 'QUEUED' && task.status !== 'RUNNING') {
+            return res.status(400).json({ message: 'Task already finished' });
+        }
+
+        const updated = await prisma.task.update({
+            where: { id: task.id },
+            data: { status: 'CANCELLED' },
+        });
+
+        return res.status(200).json({ success: true, message: 'Task cancelled', task: updated });
+    } catch (error) {
+        console.error('cancelTask error:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
