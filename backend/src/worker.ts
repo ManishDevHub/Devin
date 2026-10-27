@@ -25,25 +25,47 @@ const worker = new Worker.Worker("tasks", async (job) => {
     where: { id: taskId },
     data: { status: "RUNNING", startedAt: new Date() },
   });
-  let index = 0;
+  try {
+    let index = 0;
 
-  for (const step of fakeSteps) {
-    const current = await prisma.task.findUnique({ where: { id: taskId } });
-    if (current?.status === "CANCELLED") {
-      console.log("Task cancelled:", taskId);
-      return;
+    for (const step of fakeSteps) {
+      const current = await prisma.task.findUnique({ where: { id: taskId } });
+      if (current?.status === "CANCELLED") {
+        console.log("Task cancelled:", taskId);
+        return;
+      }
+
+      await prisma.taskStep.create({
+        data: {
+          taskId,
+          index,
+          type: step.type,
+          content: step.content,
+        },
+      });
+      index++;
+
+      await sleep(2000);
     }
 
-    await prisma.taskStep.create({
+    await prisma.task.update({
+      where: { id: taskId },
       data: {
-        taskId,
-        index,
-        type: step.type,
-        content: step.content,
+        status: "COMPLETED",
+        result: "Fake agent finished the task",
+        finishedAt: new Date(),
       },
     });
-    index++;
+  } catch (error: any) {
+    console.error("worker error:", error);
 
-    await sleep(2000);
+    await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        status: "FAILED",
+        error: error.message || "Unknown error",
+        finishedAt: new Date(),
+      },
+    });
   }
 });
