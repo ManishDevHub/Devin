@@ -1,7 +1,9 @@
 import prisma from "../src/db/prisma";
-import Worker from "bullmq";
+import{ Worker} from "bullmq";
 
 import { StepType } from "./generated/prisma/browser";
+import { redisConn } from "./config/redis";
+
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -13,7 +15,7 @@ const fakeSteps: { type: StepType; content: string }[] = [
   { type: "MESSAGE", content: "Task finished successfully" },
 ];
 
-const worker = new Worker.Worker("tasks", async (job) => {
+const worker = new Worker("tasks", async (job:any) => {
   const { taskId } = job.data;
 
   const task = await prisma.task.findUnique({ where: { id: taskId } });
@@ -68,4 +70,11 @@ const worker = new Worker.Worker("tasks", async (job) => {
       },
     });
   }
-});
+},
+{ connection: redisConn, concurrency: 2 }
+);
+
+worker.on('completed', (job) => console.log('Job done:', job.id));
+worker.on('failed', (job, err) => console.log('Job failed:', job?.id, err.message));
+
+console.log('Worker started, waiting for tasks...');
