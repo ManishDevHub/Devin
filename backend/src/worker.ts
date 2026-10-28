@@ -77,4 +77,4 @@ const worker = new Worker("tasks", async (job:any) => {
 worker.on('completed', (job) => console.log('Job done:', job.id));
 worker.on('failed', (job, err) => console.log('Job failed:', job?.id, err.message));
 
-console.log('Worker started, waiting for tasks...');
+console.log('Worker started, waiting for tasks......');
