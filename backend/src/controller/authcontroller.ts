@@ -34,17 +34,12 @@ export const signup = async (req: Request, res: Response) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Strict security: all signups are strictly regular users.
-        // Only the designated admin email receives admin role.
-        const adminEmail = (process.env.ADMIN_EMAIL || 'ramuk13476@gmail.com').toLowerCase().trim();
-        const userRole = normalizedEmail === adminEmail ? "admin" : "user";
-
         const newUser = await prisma.user.create({
             data: {
                 username: username.trim(),
                 email: normalizedEmail,
                 password: hashedPassword,
-                role: userRole
+            
             }
         });
 
