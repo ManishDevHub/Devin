@@ -4,11 +4,14 @@ import authRouter from './routes/authrouter';
 import prisma from './db/prisma';
 import projectRouter from './routes/projectroutes';
 import taskRouter from './routes/taskroutes';
+
+import cors from 'cors'
 const PORT = process.env.PORT || 5000;
 
 dotenv.config();
   const app = express();
 app.use(express.json());
+app.use(cors());
 
 
 app.use('/api/auth',  authRouter);

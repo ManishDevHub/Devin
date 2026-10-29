@@ -2,20 +2,53 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from 'next/navigation';
+
+import { apiFetch } from '@/lib/api';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
 
-  function handleLogin(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    alert("Login form submitted!");
-  }
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        if (!email || !password) {
+            setError('Email and password are required');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const { ok, data } = await apiFetch('/api/auth/login', 'POST', { email, password });
+
+            if (!ok) {
+                setError(data.message || 'Login failed');
+                return;
+            }
+
+            // save token and user in the browser
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+
+            router.push('/dashboard');
+        } catch (err) {
+            setError('Cannot connect to server');
+        } finally {
+            setLoading(false);
+        }
+    };
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#09090b] px-4 text-white">
       <form
-        onSubmit={handleLogin}
+        onSubmit={handleSubmit}
         className="w-full max-w-md space-y-5 rounded-2xl border border-white/10 bg-[#111114] p-8 shadow-2xl shadow-black/40"
       >
         <div className="mb-8 text-center">
