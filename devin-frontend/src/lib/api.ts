@@ -18,7 +18,14 @@ export const apiFetch = async (path: string, method: string = 'GET', body?: obje
         body: body ? JSON.stringify(body) : undefined,
     });
 
-    const data = await res.json();
+    let data: any = {};
+
+try {
+    data = await res.json();
+} catch (err) {
+ 
+    data = { message: `Server returned status ${res.status}` };
+}
 
     return { ok: res.ok, status: res.status, data };
 };
