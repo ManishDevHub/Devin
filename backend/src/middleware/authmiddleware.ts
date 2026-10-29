@@ -25,6 +25,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
         }
 
         const parts = authHeader.split(" ");
+        
         if (parts.length !== 2 || parts[0] !== "Bearer" || !parts[1]) {
             return res.status(401).json({
                 success: false,
@@ -33,7 +34,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
         }
 
         const token = parts[1];
-        const secret = process.env.JWT_SECRET || "secret";
+        const secret = process.env.JWT_SECRET || 'supersecret_careerhub_jwt_key_2026';
 
         const decoded = jwt.verify(token, secret) as any;
         req.user = {
