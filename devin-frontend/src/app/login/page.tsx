@@ -80,9 +80,10 @@ export default function LoginPage() {
 
         <button
           type="submit"
+          disabled={loading}
           className="w-full rounded-lg bg-violet-600 p-3 font-semibold text-white transition hover:bg-violet-500"
         >
-          Log in
+         {loading ? "Log in..." : "Log in"}
         </button>
 
         <p className="text-center text-sm text-gray-400">

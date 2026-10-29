@@ -7,11 +7,21 @@ import AuthRequest from "../middleware/authmiddleware"
 export const createProject = async (req: AuthRequest, res: Response) => {
     try{
         const { name , description , repoUrl } = req.body
+     
 
         if(!name){
             return res.status(400).json({ message: "Project name is required" });
         }
 
+            const userId = req.params.id;
+            console.log("Authenticated user:", userId);
+           if (!userId) {
+      return res.status(401).json({
+        message: "User ID missing. Please log in again.",
+        
+      });
+    }
+     console.log("Authenticated user:", req.user);
         const newProject = await prisma.project.create({
             data:{
                 name,
@@ -20,6 +30,7 @@ export const createProject = async (req: AuthRequest, res: Response) => {
                 userId: req.user?.id as string
             }
         })
+       
 
         return res.status(201).json({
             message:" Project created successfully",

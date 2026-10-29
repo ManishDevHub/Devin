@@ -37,7 +37,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
 
         const decoded = jwt.verify(token, secret) as any;
         req.user = {
-            id: decoded.userId || decoded.id,
+            id: decoded.userId ,
             email: decoded.email,
             username: decoded.username,
             role: decoded.role || "user"
