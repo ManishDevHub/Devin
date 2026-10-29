@@ -27,16 +27,20 @@ export default function SignupPage() {
         setLoading(true);
 
         try {
-            const { ok, data } = await apiFetch('/api/auth/signup', 'POST', {
-                username,
-                email,
-                password,
-            });
+           const { ok, data } = await apiFetch(
+  "/api/auth/signup",
+  "POST",
+  {
+    username,
+    email,
+    password,
+  }
+);
 
-            if (!ok) {
-                setError(data.message || 'Signup failed');
-                return;
-            }
+if (!ok) {
+  setError(data.message || "Signup failed");
+  return;
+}
 
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
@@ -92,12 +96,13 @@ export default function SignupPage() {
           className="w-full rounded-lg border border-white/10 bg-[#09090b] p-3 text-white placeholder-gray-500 outline-none transition focus:border-violet-500"
         />
 
-        <button
-          type="submit"
-          className="w-full rounded-lg bg-violet-600 p-3 font-semibold text-white transition hover:bg-violet-500"
-        >
-          Create account
-        </button>
+       <button
+  type="submit"
+  disabled={loading}
+  className="w-full rounded-lg bg-violet-600 p-3 font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+>
+  {loading ? "Creating account..." : "Create account"}
+</button>
 
         <p className="text-center text-sm text-gray-400">
           Already have an account?{" "}
