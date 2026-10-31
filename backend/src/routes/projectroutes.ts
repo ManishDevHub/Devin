@@ -7,9 +7,9 @@ const projectRouter = Router();
 
 projectRouter.post("/create", authMiddleware, createProject);
 projectRouter.get("/all",authMiddleware, getAllProjects);
-projectRouter.get("/:userId", getProjectById);
-projectRouter.put("/:userId", UpdateProject);
-projectRouter.delete("/:userId", deleteProject);
+projectRouter.get("/:userId",authMiddleware, getProjectById);
+projectRouter.put("/:userId",authMiddleware, UpdateProject);
+projectRouter.delete("/:userId",authMiddleware, deleteProject);
 
 export default projectRouter;
 
