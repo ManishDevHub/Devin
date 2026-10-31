@@ -14,14 +14,14 @@ export const createProject = async (req: AuthRequest, res: Response) => {
         }
 
             const userId = req.user?.id;
-            console.log("Authenticated user:", userId);
+         
            if (!userId) {
       return res.status(401).json({
         message: "User ID missing. Please log in again.",
         
       });
     }
-     console.log("Authenticated user:", req.user);
+  
         const newProject = await prisma.project.create({
             data:{
                 name,
@@ -43,33 +43,45 @@ export const createProject = async (req: AuthRequest, res: Response) => {
     }
 }
 
-export const getAllProjects = async ( req: AuthRequest , res: Response) => {
-    try{
-        const { id } = req.params as { id: string };
 
-        const projects = await prisma.project.findFirst({
-            where:{
-                
+export const getAllProjects = async (
+    req: AuthRequest,
+    res: Response
+) => {
+    try {
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return res.status(401).json({
+                message: "Unauthorized. Please log in again."
+            });
+        }
+
+        // Retrieve ALL projects belonging to this user
+        const projects = await prisma.project.findMany({
+            where: {
                 userId: req.user?.id as string,
-                id:id,
-
             },
-            orderBy:{
+            orderBy: {
                 createdAt: "desc"
             }
-        })
+        });
+
         return res.status(200).json({
+            success: true,
             message: "Projects fetched successfully",
-            projects
-        })
+            projects: projects
+        });
 
+    } catch (error) {
+        console.error("getAllProjects error:", error);
 
-    }catch(error){
-
-        console.error("getAllProjects error: " , error)
-        return res.status(500).json({ message: "Internal server error"})
+        return res.status(500).json({
+            success: false,
+            message: "Unable to fetch projects"
+        });
     }
-}
+};
 
 
 export const getProjectById = async ( req:AuthRequest , res: Response) =>{

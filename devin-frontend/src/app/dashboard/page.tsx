@@ -39,51 +39,67 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [loadingProjects, setLoadingProjects] = useState(true);
 
-  const loadProjects = useCallback(async () => {
+ 
+const loadProjects = useCallback(async () => {
     if (!localStorage.getItem("token")) {
-      router.replace("/login");
-      return;
+        router.replace("/login");
+        setLoadingProjects(false);
+        return;
     }
 
     try {
-      const storedUser = localStorage.getItem("user");
+        setError("");
 
-      if (storedUser) {
-        try {
-          const user = JSON.parse(storedUser);
-          setUsername(user.username || user.name || "Developer");
-        } catch {
-          setUsername("Developer");
+        const storedUser = localStorage.getItem("user");
+
+        if (storedUser) {
+            try {
+                const user = JSON.parse(storedUser);
+                setUsername(user.username || user.name || "Developer");
+            } catch {
+                setUsername("Developer");
+            }
         }
-      }
+const { ok, status, data } =
+    await apiFetch("/api/projects/all");
 
-      const { ok, status, data } = await apiFetch("/api/projects/all");
+if (status === 401) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    router.replace("/login");
+    return;
+}
 
-      if (status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        router.replace("/login");
-        return;
-      }
+if (!ok) {
+    setError(data?.message || "Unable to load projects.");
+    return;
+}
 
-      if (!ok) {
-        setError(data?.message || "Unable to load projects.");
-        return;
-      }
+const list: Project[] = Array.isArray(data?.projects)
+    ? data.projects
+    : [];
 
-      const list: Project[] = data.projects ?? [];
-      setProjects(list);
-      setProjectId((current) =>
-        list.some((project) => project.id === current)
-          ? current
-          : list[0]?.id ?? ""
-      );
-    } catch {
-      setError("Cannot connect to the server.");
+setProjects(list);
+
+setProjectId((current) =>
+    list.some((project) => project.id === current)
+        ? current
+        : list[0]?.id ?? ""
+);
+
+    } catch (error) {
+        console.error("Load projects error:", error);
+        setError("Cannot connect to the server.");
+        setProjects([]);
     } finally {
-      setLoadingProjects(false);
+        setLoadingProjects(false);
     }
-  }, [router]);
+}, [router]);
+
+
+
+
+  
 
   useEffect(() => {
     void loadProjects();

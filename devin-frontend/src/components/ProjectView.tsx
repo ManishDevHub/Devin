@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import { Task, TaskStep } from '@/types';
@@ -74,13 +75,15 @@ export default function ProjectView({ projectId }: { projectId: string }) {
 
             const tasksRes = await apiFetch(`/api/tasks/all?projectId=${projectId}`);
 
-            if (tasksRes.ok) {
-                setTasks(tasksRes.data.tasks);
+         if (tasksRes.ok) {
+    const taskList: Task[] = tasksRes.data.tasks || [];
 
-                if (tasksRes.data.tasks.length > 0) {
-                    setActiveTaskId(tasksRes.data.tasks[0].id);
-                }
-            }
+    setTasks(taskList);
+
+    if (taskList.length > 0) {
+        setActiveTaskId(taskList[0].id);
+    }
+}
         } catch (err) {
             setError('Cannot connect to server');
         }
@@ -151,6 +154,23 @@ export default function ProjectView({ projectId }: { projectId: string }) {
         };
     }, [activeTaskId]);
 
+    // reload the task every 2 seconds while it is queued or running
+useEffect(() => {
+    if (!activeTaskId) return;
+    if (status !== 'QUEUED' && status !== 'RUNNING') return;
+
+    const timer = setInterval(async () => {
+        const { ok, data } = await apiFetch(`/api/tasks/${activeTaskId}`);
+
+        if (ok && data.task) {
+            setSteps((prev) => mergeSteps(prev, data.task.steps || []));
+            setStatus(data.task.status);
+        }
+    }, 2000);
+
+    return () => clearInterval(timer);
+}, [activeTaskId, status]);
+
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -172,13 +192,13 @@ export default function ProjectView({ projectId }: { projectId: string }) {
                 prompt: prompt.trim(),
             });
 
-            if (!ok) {
-                setError(data.message || 'Could not start task');
-                return;
-            }
+           if (!ok || !data.task) {
+    setError(data.message || 'Could not start task');
+    return;
+}
 
-            setTasks([data.task, ...tasks]);
-            setActiveTaskId(data.task.id);
+setTasks([data.task, ...tasks]);
+setActiveTaskId(data.task.id);
             setPrompt('');
         } catch (err) {
             setError('Cannot connect to server');

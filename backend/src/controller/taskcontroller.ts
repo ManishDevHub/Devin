@@ -46,19 +46,19 @@ export const getAllTasks = async ( req:AuthRequest , res: Response) => {
 
     try{
 
-        const task = await prisma.task.findMany({
+        const tasks = await prisma.task.findMany({
             where:{
                 userId: req.user?.id as string
             },
             orderBy: { createdAt: 'desc' },
         })
-        if(!task) {
+        if(!tasks) {
             return res.status(404).json({ message: "No tasks found"})
         }
 
         return res.status(200).json({
             message: " Tasks fetched successfully",
-            task
+            tasks
         })
 
 
