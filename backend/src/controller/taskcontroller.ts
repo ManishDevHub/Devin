@@ -3,11 +3,13 @@
 import { Response} from "express";
 import AuthRequest from "../middleware/authmiddleware";
 import prisma from "../db/prisma";
-
+import { taskQueue } from '../config/queue';
 
 export const createTask =  async( req: AuthRequest , res:Response) => {
     
+    
     try{
+       
 
         const { projectId , prompt } = req.body;
            if (!projectId || !prompt) {
@@ -26,6 +28,7 @@ export const createTask =  async( req: AuthRequest , res:Response) => {
             }
             
         })
+         await taskQueue.add('run-task', { taskId: newTask.id });
 
         return res.status(201).json({
             message: "Task created successfully",
