@@ -45,11 +45,13 @@ export const createProject = async (req: AuthRequest, res: Response) => {
 
 export const getAllProjects = async ( req: AuthRequest , res: Response) => {
     try{
+        const { id } = req.params as { id: string };
 
-        const projects = await prisma.project.findMany({
+        const projects = await prisma.project.findFirst({
             where:{
                 
-                userId: req.user?.id as string
+                userId: req.user?.id as string,
+                id:id,
 
             },
             orderBy:{
