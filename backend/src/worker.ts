@@ -17,12 +17,21 @@ const fakeSteps: { type: StepType; content: string }[] = [
 
 const worker = new Worker("tasks", async (job:any) => {
   const { taskId } = job.data;
+    console.log('Got job for task:', taskId);
 
-  const task = await prisma.task.findUnique({ where: { id: taskId } });
-  if (!task || task.status !== "QUEUED") {
-    throw new Error(`Task with ID ${taskId} not found or not in QUEUED status`);
-  }
+    const task = await prisma.task.findUnique({ where: { id: taskId } });
 
+    if (!task) {
+        console.log('Task not found in database');
+        return;
+    }
+
+    if (task.status !== 'QUEUED') {
+        console.log('Skipping, task status is', task.status);
+        return;
+    }
+
+    console.log('Running task...');
   await prisma.task.update({
     where: { id: taskId },
     data: { status: "RUNNING", startedAt: new Date() },
