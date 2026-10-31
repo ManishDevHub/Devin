@@ -13,7 +13,7 @@ export const createProject = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({ message: "Project name is required" });
         }
 
-            const userId = req.params.id;
+            const userId = req.user?.id;
             console.log("Authenticated user:", userId);
            if (!userId) {
       return res.status(401).json({
