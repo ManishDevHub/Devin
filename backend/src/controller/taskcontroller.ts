@@ -78,7 +78,7 @@ export const getTaskById  = async ( req: AuthRequest , res: Response ) => {
                 id: id,
                 userId: userId
             },
-            orderBy: { createdAt: 'desc' },
+            include: { steps: { orderBy: { index: 'asc' } } },
         })
 
         if(!task) {
