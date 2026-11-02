@@ -57,7 +57,6 @@ export const getAllProjects = async (
             });
         }
 
-        // Retrieve ALL projects belonging to this user
         const projects = await prisma.project.findMany({
             where: {
                 userId: req.user?.id as string,

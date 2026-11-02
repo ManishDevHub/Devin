@@ -58,17 +58,17 @@ const worker = new Worker(
                     return;
                 }
 
-                // 2. save the step, then send it to the browser
+               
                 const savedStep = await prisma.taskStep.create({
                     data: { taskId, index, type: step.type, content: step.content },
                 });
                 await publish(taskId, { event: 'step', step: savedStep });
 
                 index++;
-                await sleep(2000); // pretend the agent is working
+                await sleep(2000); 
             }
 
-            // 3. mark as completed
+           
             await prisma.task.update({
                 where: { id: taskId },
                 data: {
