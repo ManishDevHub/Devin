@@ -327,9 +327,9 @@ setActiveTaskId(data.task.id);
                 <div className="flex-1 border-b border-zinc-800 flex items-center justify-center text-zinc-600 text-sm">
                     Editor goes here (Part 4)
                 </div>
-             <div className="h-64 bg-[#0a0a0a] border-t border-zinc-800 p-2">
-    <TerminalPanel key={activeTaskId} taskId={activeTaskId} steps={steps} />
-</div>
+               <div className="h-64 bg-[#0a0a0a] border-t border-zinc-800 p-2">
+     <TerminalPanel key={activeTaskId} taskId={activeTaskId} steps={steps} />
+                           </div>
             </section>
         </div>
     );
