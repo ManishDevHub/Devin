@@ -1,185 +1,161 @@
-
-
-import { Response} from "express";
+import { Response } from "express";
 import AuthRequest from "../middleware/authmiddleware";
 import prisma from "../db/prisma";
-import { taskQueue } from '../config/queue';
+import { taskQueue } from "../config/queue";
 
-export const createTask =  async( req: AuthRequest , res:Response) => {
-    
-    
-    try{
-       
-
-        const { projectId , prompt } = req.body;
-           if (!projectId || !prompt) {
-            return res.status(400).json({
-                success: false,
-                message: 'projectId and prompt are required',
-            });
-        }
-
-        const newTask = await prisma.task.create({
-            data:{
-                projectId,
-                prompt,
-                userId: req.user?.id as string,
-                status: 'QUEUED',
-            }
-            
-        })
-         await taskQueue.add('run-task', { taskId: newTask.id });
-
-        return res.status(201).json({
-            message: "Task created successfully",
-            task: newTask
-        })
-
-
-    } catch( error) {
-        console.error("createTask error:" , error);
-        return res.status(500).json({ message: "Internal server error"});
+export const createTask = async (req: AuthRequest, res: Response) => {
+  try {
+    const { projectId, prompt } = req.body;
+    if (!projectId || !prompt) {
+      return res.status(400).json({
+        success: false,
+        message: "projectId and prompt are required",
+      });
     }
-}
 
-export const getAllTasks = async ( req:AuthRequest , res: Response) => {
+    const newTask = await prisma.task.create({
+      data: {
+        projectId,
+        prompt,
+        userId: req.user?.id as string,
+        status: "QUEUED",
+      },
+    });
+    await taskQueue.add("run-task", { taskId: newTask.id });
 
-    try{
+    return res.status(201).json({
+      message: "Task created successfully",
+      task: newTask,
+    });
+  } catch (error) {
+    console.error("createTask error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-        const tasks = await prisma.task.findMany({
-            where:{
-                userId: req.user?.id as string
-            },
-            orderBy: { createdAt: 'desc' },
-        })
-        if(!tasks) {
-            return res.status(404).json({ message: "No tasks found"})
-        }
-
-        return res.status(200).json({
-            message: " Tasks fetched successfully",
-            tasks
-        })
-
-
-
-    } catch(error) {
-        console.error("getAllTasks error: " , error);
-        return res.status(500).json({ message: "Internal server error"});
+export const getAllTasks = async (req: AuthRequest, res: Response) => {
+  try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        userId: req.user?.id as string,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    if (!tasks) {
+      return res.status(404).json({ message: "No tasks found" });
     }
-}
 
+    return res.status(200).json({
+      message: " Tasks fetched successfully",
+      tasks,
+    });
+  } catch (error) {
+    console.error("getAllTasks error: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-export const getTaskById  = async ( req: AuthRequest , res: Response ) => {
+export const getTaskById = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params as { id: string };
+    const userId = req.user?.id as string;
+    const task = await prisma.task.findFirst({
+      where: {
+        id: id,
+        userId: userId,
+      },
+      include: { steps: { orderBy: { index: "asc" } } },
+    });
 
-    try{
-
-        const { id } = req.params as { id: string };
-        const userId = req.user?.id as string;
-        const task = await prisma.task.findFirst({
-            where:{
-                id: id,
-                userId: userId
-            },
-            include: { steps: { orderBy: { index: 'asc' } } },
-        })
-
-        if(!task) {
-            return res.status(404).json({ message: "Task not found" })
-        }
-
-        return res.status(200).json({
-            message: "Task fetched successfully",
-            task
-        })
-
-    }catch(error) {
-
-        console.error("getTaskById error" , error);
-        return res.status(500).json({ message: "Internal server error"})
-
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
     }
-}
 
- export const UpdateTask = async (req:AuthRequest , res: Response) => {
+    return res.status(200).json({
+      message: "Task fetched successfully",
+      task,
+    });
+  } catch (error) {
+    console.error("getTaskById error", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-    try{ 
+export const UpdateTask = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params as { id: string };
+    const { prompt } = req.body;
+    const userId = req.user?.id as string;
 
-        const { id } = req.params as { id: string };
-        const { prompt } = req.body;
-        const userId = req.user?.id as string;
-
-        const task = await prisma.task.update({
-            where:{
-                id: id,     
-            userId: userId
-            },
-            data: { status: 'CANCELLED', finishedAt: new Date() },
-        })  
-    if(!task) { 
-        return res.status(404).json({ message: "Task not found" })
+    const task = await prisma.task.update({
+      where: {
+        id: id,
+        userId: userId,
+      },
+      data: { status: "CANCELLED", finishedAt: new Date() },
+    });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
     }
     return res.status(200).json({
-        message: "Task updated successfully",
-        task
-    })
+      message: "Task updated successfully",
+      task,
+    });
+  } catch (error) {
+    console.error("UpdateTask error", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-    } catch(error) {
-        console.error("UpdateTask error" , error);
-        return res.status(500).json({ message: "Internal server error"})
-    }
-}
+export const deleteTask = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params as { id: string };
+    const userId = req.user?.id as string;
 
-export const deleteTask = async ( req: AuthRequest , res: Response ) => {
+    const task = await prisma.task.delete({
+      where: {
+        id: id,
+        userId: userId,
+      },
+    });
 
-    try{  
-
-        const { id } = req.params as { id: string };
-        const userId = req.user?.id as string;  
-
-        const task = await prisma.task.delete({
-            where:{
-                id: id,
-                userId: userId
-            }
-        })  
-
-        return res.status(200).json({ 
-            message: "Task deleted successfully"
-        })
-
-      } catch(error) {
-        console.error("deleteTask error" , error);
-        return res.status(500).json({ message: "Internal server error"})
-    } 
-}
-
+    return res.status(200).json({
+      message: "Task deleted successfully",
+    });
+  } catch (error) {
+    console.error("deleteTask error", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const cancelTask = async (req: AuthRequest, res: Response) => {
-    try {
+  try {
+    const { id } = req.params as { id: string };
+    const userId = req.user?.id as string;
+    const task = await prisma.task.findFirst({
+      where: { id: id, userId: userId },
+    });
 
-        const { id } = req.params as { id: string };
-        const userId = req.user?.id as string;
-        const task = await prisma.task.findFirst({
-            where: { id: id, userId: userId },
-        });
-
-        if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
-        }
-
-        if (task.status !== 'QUEUED' && task.status !== 'RUNNING') {
-            return res.status(400).json({ message: 'Task already finished' });
-        }
-
-        const updated = await prisma.task.update({
-            where: { id: task.id },
-            data: { status: 'CANCELLED' },
-        });
-
-        return res.status(200).json({ success: true, message: 'Task cancelled', task: updated });
-    } catch (error) {
-        console.error('cancelTask error:', error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
     }
+
+    if (task.status !== "QUEUED" && task.status !== "RUNNING") {
+      return res.status(400).json({ message: "Task already finished" });
+    }
+
+    const updated = await prisma.task.update({
+      where: { id: task.id },
+      data: { status: "CANCELLED" },
+    });
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Task cancelled", task: updated });
+  } catch (error) {
+    console.error("cancelTask error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
 };
