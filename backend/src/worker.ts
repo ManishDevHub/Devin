@@ -11,13 +11,61 @@ const publish = async (taskId: string, data: object) => {
 };
 
 // FAKE agent steps. Later we replace this with the real Claude agent.
-const fakeSteps = [
+// const fakeSteps = [
+//     { type: 'THOUGHT', content: 'I will read the task and make a plan' },
+//     { type: 'COMMAND', content: 'npm create vite@latest my-app' },
+//     { type: 'FILE_EDIT', content: 'Created src/Login.jsx' },
+//     { type: 'COMMAND', content: 'npm run build' },
+//     { type: 'MESSAGE', content: 'Task finished successfully' },
+// ] as const;
+// type FakeStep = {
+//     type: 'THOUGHT' | 'COMMAND' | 'FILE_EDIT' | 'BROWSER' | 'MESSAGE' | 'ERROR';
+//     content: string;
+//     metadata?: { path: string; content: string };
+// };
+
+const fakeSteps: FakeStep[] = [
     { type: 'THOUGHT', content: 'I will read the task and make a plan' },
     { type: 'COMMAND', content: 'npm create vite@latest my-app' },
-    { type: 'FILE_EDIT', content: 'Created src/Login.jsx' },
+    {
+        type: 'FILE_EDIT',
+        content: 'Created src/Login.jsx',
+        metadata: {
+            path: 'src/Login.jsx',
+            content: `export default function Login() {
+    return (
+        <form>
+            <h1>Login</h1>
+            <input type="email" placeholder="Email" />
+            <input type="password" placeholder="Password" />
+            <button type="submit">Login</button>
+        </form>
+    );
+}
+`,
+        },
+    },
+    {
+        type: 'FILE_EDIT',
+        content: 'Created src/App.jsx',
+        metadata: {
+            path: 'src/App.jsx',
+            content: `import Login from './Login';
+
+export default function App() {
+    return <Login />;
+}
+`,
+        },
+    },
     { type: 'COMMAND', content: 'npm run build' },
     { type: 'MESSAGE', content: 'Task finished successfully' },
-] as const;
+]as const;
+type FakeStep = {
+    type: 'THOUGHT' | 'COMMAND' | 'FILE_EDIT' | 'BROWSER' | 'MESSAGE' | 'ERROR';
+   content: string;
+    metadata?: { path: string; content: string };
+ };
 
 const worker = new Worker(
     'tasks',
@@ -57,12 +105,20 @@ const worker = new Worker(
                     console.log('Task cancelled:', taskId);
                     return;
                 }
-
+const savedStep = await prisma.taskStep.create({
+    data: {
+        taskId,
+        index,
+        type: step.type,
+        content: step.content,
+        metadata: step.metadata,
+    },
+});
                
-                const savedStep = await prisma.taskStep.create({
-                    data: { taskId, index, type: step.type, content: step.content },
-                });
-                await publish(taskId, { event: 'step', step: savedStep });
+                // const savedStep = await prisma.taskStep.create({
+                //     data: { taskId, index, type: step.type, content: step.content },
+                // });
+                // await publish(taskId, { event: 'step', step: savedStep });
 
                 index++;
                 await sleep(2000); 

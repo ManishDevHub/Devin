@@ -28,5 +28,6 @@ export interface TaskStep {
     index: number;
     type: 'THOUGHT' | 'COMMAND' | 'FILE_EDIT' | 'BROWSER' | 'MESSAGE' | 'ERROR';
     content: string;
+    metadata?: { path: string; content: string } | null;
     createdAt: string;
 }

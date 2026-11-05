@@ -1,4 +1,5 @@
 'use client';
+import EditorPanel from '@/components/EditorPanel';
 
 import { useEffect, useRef, useState } from 'react';
 import TerminalPanel from '@/components/TerminalPanel';
