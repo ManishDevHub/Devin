@@ -156,7 +156,6 @@ export default function ProjectView({ projectId }: { projectId: string }) {
         };
     }, [activeTaskId]);
 
-    // reload the task every 2 seconds while it is queued or running
 useEffect(() => {
     if (!activeTaskId) return;
     if (status !== 'QUEUED' && status !== 'RUNNING') return;
