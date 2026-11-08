@@ -8,7 +8,7 @@ interface EditorPanelProps {
     steps: TaskStep[];
 }
 
-// Monaco needs the language name for colors
+
 const getLanguage = (path: string) => {
     const ext = path.split('.').pop()?.toLowerCase();
 
