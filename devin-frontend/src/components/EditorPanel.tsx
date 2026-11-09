@@ -45,7 +45,7 @@ export default function EditorPanel({ steps }: EditorPanelProps) {
         return edits.length > 0 ? edits[edits.length - 1].metadata!.path : '';
     }, [steps]);
 
-    // open the newest file by itself, but only when a new file comes
+  
     useEffect(() => {
         if (lastPath) {
             setSelectedPath(lastPath);
