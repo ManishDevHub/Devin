@@ -25,7 +25,7 @@ const getLanguage = (path: string) => {
 export default function EditorPanel({ steps }: EditorPanelProps) {
     const [selectedPath, setSelectedPath] = useState('');
 
-    // build the files from FILE_EDIT steps: path -> latest content
+ 
     const files = useMemo(() => {
         const map = new Map<string, string>();
 
@@ -38,7 +38,7 @@ export default function EditorPanel({ steps }: EditorPanelProps) {
         return map;
     }, [steps]);
 
-    // the file edited last
+   
     const lastPath = useMemo(() => {
         const edits = steps.filter((s) => s.type === 'FILE_EDIT' && s.metadata?.path);
 
