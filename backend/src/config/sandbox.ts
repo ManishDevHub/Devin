@@ -82,4 +82,15 @@ export const writeFile = async ( container: Docker.Container,path:string, conten
     if(path.includes('..') || path.includes("'") || path.startsWith('/')){
         throw new Error(`Invalid file path: ${path}`);
     }
+
+    const base64 = Buffer.from(content).toString('base64');
+    const folder = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '.';
+
+    return runCommand (
+
+        container,
+        `mkdir -p '${folder}' && echo '${base64}' | base64 -d > '${path}'`
+    )
 }
+
+
