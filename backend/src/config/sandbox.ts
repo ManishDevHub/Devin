@@ -31,3 +31,29 @@ const name = `sandbox-${taskId}`;
     await container.start();
     return container;
 }
+
+
+export const runCommand = async ( container: Docker.Container, command:string, timeoutMs: number = 120000) => {
+
+    const exec = await container .exec({
+        Cmd: ['bash', '-c', command],
+        AttachStdout: true,
+        AttachStderr: true, 
+        WorkingDir: '/workspace',
+    })
+
+    const stream = await exec.start({ hijack:true, stdin:false });
+
+    const stdout = new PassThrough();
+    const stderr = new PassThrough();
+    container.modem.demuxStream(stream, stdout, stderr);
+    let output = '';
+    stdout.on('data', (chunk) => (output += chunk.toString()));
+    stderr.on('data', (chunk) => (output += chunk.toString()));
+
+    const finished = new Promise<string>((resolve ) => {
+        stream.on('end',() => resolve('done'))
+    });
+    
+
+}
