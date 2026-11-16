@@ -1,4 +1,5 @@
 import Docker from 'dockerode';
+import { exitCode } from 'process';
 import { PassThrough } from 'stream';
 
 const docker = new Docker();
@@ -54,6 +55,24 @@ export const runCommand = async ( container: Docker.Container, command:string, t
     const finished = new Promise<string>((resolve ) => {
         stream.on('end',() => resolve('done'))
     });
-    
 
-}
+    let timer: NodeJS.Timeout | null = null;
+    const timeout = new Promise<string>((resolve) => {
+        timer = setTimeout(() => resolve('timeout'), timeoutMs);
+    })
+    const result = await Promise.race([finished, timeout]);
+
+    clearTimeout(timer!);
+    if(result === 'timeout'){
+        stream.destroy();
+        return { output:output + '\n[command timed out]', exitCode:124};
+    }
+
+    const info = await exec.inspect();
+    return {
+
+        output:output.slice(-20000),
+        exitCode:info.ExitCode ?? 0,
+    };
+
+};
