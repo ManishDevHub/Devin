@@ -94,3 +94,11 @@ export const writeFile = async ( container: Docker.Container,path:string, conten
 }
 
 
+export const readFile = async ( conatiner: Docker.Container, path:string) => {
+    if(path.includes('..') || path.includes("'") || path.startsWith('/')){
+        throw new Error(`Invalid file path: ${path}`);
+    }
+    const { output } = await runCommand(conatiner , `cat '${path}'`);
+    return output;
+}
+
