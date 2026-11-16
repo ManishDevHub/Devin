@@ -102,3 +102,15 @@ export const readFile = async ( conatiner: Docker.Container, path:string) => {
     return output;
 }
 
+export const destroySandbox = async ( container:Docker.Container) => {
+
+    try{
+        await container.remove({ force: true });
+
+    }catch(error){
+
+        console.error("Could not destroy sandbox:", error);
+    }
+}
+
+
