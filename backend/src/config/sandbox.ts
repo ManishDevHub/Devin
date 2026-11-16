@@ -76,3 +76,10 @@ export const runCommand = async ( container: Docker.Container, command:string, t
     };
 
 };
+
+export const writeFile = async ( container: Docker.Container,path:string, content:string) => {
+
+    if(path.includes('..') || path.includes("'") || path.startsWith('/')){
+        throw new Error(`Invalid file path: ${path}`);
+    }
+}
