@@ -13,7 +13,7 @@ const test = async () => {
         console.log('3. list files:', await runCommand(sandbox, 'ls -R'));
         console.log('4. read file:', await readFile(sandbox, 'src/hello.js'));
         console.log('5. failing command:', await runCommand(sandbox, 'exit 3'));
-        console.log('6. exit command:', await runCommand(sandbox, 'exit 4'));
+       
 
     } finally {
         await destroySandbox(sandbox);
