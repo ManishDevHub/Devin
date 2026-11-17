@@ -1,5 +1,5 @@
 import Docker from "dockerode";
-import { exitCode } from "process";
+
 import { PassThrough } from "stream";
 
 const docker = new Docker();
@@ -7,11 +7,13 @@ const IMAGE = "node:20-slim";
 
 export const createSandbox = async (taskId: string) => {
   const name = `sandbox-${taskId}`;
-  try {
+   try {
     await docker.getContainer(name).remove({ force: true });
-  } catch (error) {
-    console.error("Error creating sandbox:", error);
-    throw error;
+  } catch (error: any) {
+    if (error.statusCode !== 404) {
+      console.error("Could not remove the old sandbox:", error);
+      throw error;
+    }
   }
 
   const container = await docker.createContainer({
