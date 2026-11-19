@@ -7,7 +7,6 @@ import { TaskStep } from "@/types";
 interface EditorPanelProps {
   steps: TaskStep[];
 }
-
 const getLanguage = (path: string) => {
   const ext = path.split(".").pop()?.toLowerCase();
 
@@ -20,7 +19,6 @@ const getLanguage = (path: string) => {
 
   return "plaintext";
 };
-
 export default function EditorPanel({ steps }: EditorPanelProps) {
   const [selectedPath, setSelectedPath] = useState("");
 
@@ -32,7 +30,6 @@ export default function EditorPanel({ steps }: EditorPanelProps) {
         map.set(step.metadata.path, step.metadata.content);
       }
     });
-
     return map;
   }, [steps]);
 
