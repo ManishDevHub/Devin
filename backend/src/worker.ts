@@ -5,7 +5,7 @@ import { redisConn } from './config/redis';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// send an event to the browser through Redis
+
 const publish = async (taskId: string, data: object) => {
     await redisConn.publish(`task:${taskId}`, JSON.stringify(data));
 };
