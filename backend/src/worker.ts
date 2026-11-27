@@ -10,7 +10,7 @@ const publish = async (taskId: string, data: object) => {
     await redisConn.publish(`task:${taskId}`, JSON.stringify(data));
 };
 
-// FAKE agent steps. Later we replace this with the real Claude agent.
+
 // const fakeSteps = [
 //     { type: 'THOUGHT', content: 'I will read the task and make a plan' },
 //     { type: 'COMMAND', content: 'npm create vite@latest my-app' },
@@ -86,8 +86,6 @@ const worker = new Worker(
         }
 
         console.log('Running task...');
-
-        // 1. mark as running
         await prisma.task.update({
             where: { id: taskId },
             data: { status: 'RUNNING', startedAt: new Date() },
@@ -98,7 +96,6 @@ const worker = new Worker(
             let index = 0;
 
             for (const step of fakeSteps) {
-                // stop if the user pressed Stop
                 const current = await prisma.task.findUnique({ where: { id: taskId } });
 
                 if (current?.status === 'CANCELLED') {
